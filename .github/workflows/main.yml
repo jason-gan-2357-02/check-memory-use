@@ -1,0 +1,45 @@
+name: Check memory use
+
+on:
+  workflow_dispatch: # Allows running from the Actions tab
+
+jobs:
+  check-memory-use-job:
+    name: Check memory use job
+    runs-on: self-hosted # Target local machine
+    
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Run PowerShell script
+        shell: powershell
+        run: |
+          echo "Running script CheckMemoryUse.ps1"
+          .\CheckMemoryUse.ps1
+
+      - name: Publish results to GitHub Summary
+        shell: powershell
+        run: |
+          # 1. Read results file from PowerShell script
+          $JsonContent = Get-Content -Path "MemoryUse.json" -Raw
+
+          # 2. Build markdown string with collapsible section
+          $Summary = @(
+              '#### Memory Use',
+              '',
+              '```json',
+              $JsonContent,
+              '```',
+              ''
+          )
+
+          # 3. Append to GitHub Summary environment file
+          $Summary | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8          
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: MemoryUse # Downloadable zip file
+          path: MemoryUse.json # Results file from Powershell script
+          retention-days: 30

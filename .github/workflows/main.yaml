@@ -1,0 +1,19 @@
+name: Check Memory Use on Self-Hosted Runner
+
+on:
+  workflow_dispatch: # Allows you to run this manually from the Actions tab
+
+jobs:
+  check-memory-use:
+    # This is the key that targets your local machine
+    runs-on: self-hosted
+    
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Run PowerShell script
+        shell: pwsh # Use PowerShell Core
+        run: |
+          echo "Running script CheckMemoryUse.ps1"
+          .\CheckMemoryUse.ps1
